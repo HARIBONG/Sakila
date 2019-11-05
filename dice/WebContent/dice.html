@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/dice/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+<h1>DICE</h1>
+	<div>
+		<img id = "img1" src = "/dice/images/dice1.png">
+		<img id = "img2" src = "/dice/images/dice1.png">
+	</div>
+	<button id = "rullet">룰렛!</button>
+</body>
+<script type="text/javascript">
+	let model = ["dice1.png", 
+				"dice2.png", 
+				"dice3.png", 
+				"dice4.png", 
+				"dice5.png", 
+				"dice6.png"];
+
+	
+	$(document).ready(function(){
+		$("#rullet").click(function(){
+			$("#rulllet").hide();
+			let count = 0;
+				time1 = setInterval(function(){
+					
+				count++
+				random1 = Math.floor((Math.random()*6));
+				random2 = Math.floor((Math.random()*6));
+				$("#img1").attr("src","/dice/images/"+model[random1]);
+				$("#img2").attr("src","/dice/images/"+model[random2]);
+			
+				if(count == 20){
+					clearInterval(time1);
+					$("#rullet").show();
+				}
+		},100);
+	});
+	});
+</script>
+</html>
