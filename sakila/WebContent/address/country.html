@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>country html</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        position: relative;
+        overflow-y: auto;
+    }
+    
+    #aside {
+        width: 200px;
+        height: 3000px;
+        position: fixed;
+        background: orange;
+        overflow: hidden;
+        float: left;
+    }
+    
+    #section {
+        margin-left: 300px;
+        margin-right: 500px;
+        margin-bottom: 100px;
+        background: white;
+    }
+</style>
+</head>
+<body>
+    <div id="aside">
+       
+    </div>
+    <div id="section">
+   
+			<h1>Country 관리</h1>
+			<h2>country 입력</h2>
+				<div>
+					 <div>country : <input type = "text" id = "country"></div>
+					 <div><button type="button" id = "addCountry"> add country</button></div>
+				</div>
+				
+			<h2>country 목록</h2>	
+			<div>
+				<table border="1">
+					<thead>
+						<tr>
+							<th>country_id</th>
+							<th>country</th>
+							<th>last_update</th>
+						</tr>
+					</thead>
+					<tbody id = "list">
+					</tbody>			
+				</table>
+			</div>
+			<button type = "button" id = "preBtn">이전</button>
+			<button type = "button" id = "nextBtn">다음</button><br>
+			<button type = "button" id = "home">HOME</button>
+    </div>
+</body>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		$("#aside").load("/sakila/aside.html");
+	</script>
+	
+	<script type="text/javascript">
+	$("#home").click(function(){
+		location.href = "/sakila/index.html"; 
+	});	
+	
+	let currentPage = 1;
+		$("#list").empty();
+		$.ajax({
+			url: "/sakila/address/selectCountryList",
+			method : "POST",
+			data : {"currentPage" : currentPage},
+			success : function(json){ // json파일을 자바스크리브 객체변경 후 json에 들어감
+				console.log(json);
+				for(let i=0; i<json.length; i++){
+					let html = "<tr>";
+						html += "<td>"+json[i].countryId+"</td>";
+						html += "<td>"+json[i].country+"</td>";
+						html += "<td>"+json[i].lastUpdate+"</td>";
+			  			html += "</tr>";
+			  			$("#list").append(html);
+				}
+			}
+		});
+	
+		$("#addCountry").click(function(){ //#addCountry를 누르는 순간 .click()함수가 실행된다
+			console.log("country.value :", $("#country").val());
+			$.ajax({ //html요청 >> ajax요청, 비동기 방식                                             
+				url : "/sakila/address/InsertCountry",
+				method : "POST",
+				data : {country : $("#country").val()},
+				success : function(){
+					console.log("석섹스!");
+					//입력 성공 후에 리스트를 가져옴
+					$("#list").empty();
+					$.ajax({
+						url: "/sakila/address/selectCountryList",
+						method : "POST",
+						success : function(json){ // json파일을 자바스크리브 객체변경 후 json에 들어감
+							for(let i=0; i<json.length; i++){
+								let html = "<tr>";
+									html += "<td>"+json[i].countryId+"</td>";
+									html += "<td>"+json[i].country+"</td>";
+									html += "<td>"+json[i].lastUpdate+"</td>";
+						  			html += "</tr>";
+						  			$("#list").append(html);
+							}
+						}
+					});
+					//으후루꾸꾸루후으으후루꾸꾸루후으으후루꾸꾸누루으
+				}
+			});
+		});
+		
+		$("#preBtn").click(function(){
+			if(currentPage <= 1){
+				return;
+			}
+			currentPage -= 1;
+			console.log(currentPage);
+			$("#list").empty();
+			$.ajax({
+				url : "/sakila/address/selectCountryList",
+				method : "POST",
+				data : {"currentPage" : currentPage},
+				success : function(json){ // json파일을 자바스크리브 객체변경 후 json에 들어감
+					console.log(json);
+					for(let i=0; i<json.length; i++){
+						let html = "<tr>";
+							html += "<td>"+json[i].countryId+"</td>";
+							html += "<td>"+json[i].country+"</td>";
+							html += "<td>"+json[i].lastUpdate+"</td>";
+				  			html += "</tr>";
+				  			$("#list").append(html);
+					}
+				}
+			})
+		});
+
+		$("#nextBtn").click(function(){
+			console.log(currentPage);
+			
+			currentPage += 1;
+			$("#list").empty();
+			$.ajax({
+				url : "/sakila/address/selectCountryList",
+				method : "post",
+				data : {"currentPage" : currentPage},
+				success : function(json){ // json파일을 자바스크리브 객체변경 후 json에 들어감
+					console.log(json);
+					for(let i=0; i<json.length; i++){
+						let html = "<tr>";
+							html += "<td>"+json[i].countryId+"</td>";
+							html += "<td>"+json[i].country+"</td>";
+							html += "<td>"+json[i].lastUpdate+"</td>";
+				  			html += "</tr>";
+				  			$("#list").append(html);
+					}
+				}
+			})
+		});
+		
+	</script>
+</html>

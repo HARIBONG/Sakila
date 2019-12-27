@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        position: relative;
+        overflow-y: auto;
+    }
+    
+    #aside {
+        width: 200px;
+        height: 3000px;
+        position: fixed;
+        background: orange;
+        overflow: hidden;
+        float: left;
+    }
+    
+    #section {
+        margin-left: 300px;
+        margin-right: 500px;
+        margin-bottom: 100px;
+        background: white;
+    }
+</style>
+<title>Insert title here</title>
+</head>
+<body>
+	<div id = "aside">
+	
+	</div>
+	<div id = "section">
+		<h1>CITY</h1>
+		<h2>city 추가</h2>
+		
+		<div>
+			<div class = "dan">country 리스트
+				<select id = "countryList" size = "10">
+				</select>
+			</div>
+			<div>
+				<table>
+					<tr>
+						<td>Country ID :</td>
+						<td><input type = "text" id = "countryId" readonly="readonly"></td>
+					</tr>
+					<tr>
+						<td>CITY</td>
+						<td><input type = "text" id = "city"></td>
+					</tr>
+					<tr>
+						<td>
+							<button type = "button" id="addBtn">ADD CITY</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<h1>CITY 목록</h1>
+		<div>
+			<table border="1">
+				<thead>
+					<tr>
+						<th>CITY_ID</th>
+						<th>CITY</th>
+						<th>Country_ID</th>
+						<th>Last_update</th>
+					</tr>
+				</thead>
+				
+				<tbody id = "list">
+					
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript">
+	$("#aside").load("/sakila/aside.html");
+//-------------------country 리스트 출력 -------------------------------------------------------
+	$.ajax({
+		url : "/sakila/address/SelectCountryAll",
+		method : "POST",
+		success : function(json) {
+			$(json).each(function(index, item) { // json값의 크기만큼 반복된다. (each==반복문)
+				temp = "<option value='";
+				temp += item.countryId;
+				temp += "'>";
+				temp += item.country;
+				temp += "</option>";
+				$("#countryList").append(temp);
+			});
+		}
+	});
+//=======================city list 비우기========================================
+	$("#list").empty();
+	$.ajax({
+		url : "/sakila/address/SelectCityList",
+		method : "POST",
+		success : function(json){
+			console.log(json);
+			for(let i=0; i<json.length; i++){
+				let html = "<tr>";
+					html += "<td>"+json[i].cityId+"</td>";
+					html += "<td>"+json[i].city+"</td>";
+					html += "<td>"+json[i].country.countryId+"</td>";
+					html += "<td>"+json[i].lastUpdate+"</td>";
+	  				html += "</tr>";
+	  				$("#list").append(html);
+			}
+		}
+	});
+	
+	$("#countryList").change(function(){
+		$("#countryId").val($("#countryList").val());			
+	});
+	
+	$("#addBtn").click(function(){
+		console.log("country.value :", $("#countryId").val());
+		console.log("country.value :", $("#city").val());
+		if($("#countryId").val()==="" || $("#city").val()===""){
+			alert("입력 ㄱㄱㄱ");
+			return;
+		}else{
+			$("#list").empty();
+			$.ajax({
+				url : "/sakila/address/InsertCity",
+				method : "POST",
+				data : {"countryId" : $("#countryId").val(), "city" : $("#city").val()},
+				success : function(){
+					$.ajax({
+						url : "/sakila/address/SelectCityList",
+						method : "POST",
+						success : function(json){
+							console.log(json);
+							for(let i=0; i<json.length; i++){
+								let html = "<tr>";
+									html += "<td>"+json[i].cityId+"</td>";
+									html += "<td>"+json[i].city+"</td>";
+									html += "<td>"+json[i].country.countryId+"</td>";
+									html += "<td>"+json[i].lastUpdate+"</td>";
+					  				html += "</tr>";
+					  				$("#list").append(html);
+							}
+						}
+					});
+				}
+			});
+		}
+	});
+</script>
+</html>

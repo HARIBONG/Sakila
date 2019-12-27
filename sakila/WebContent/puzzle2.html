@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+	table, td {border: 1px solid gray;}
+	table {border-collapse: collapse;}
+</style>
+<script src="/jquery-ex/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+	<h2>puzzle - <span id="loginState"></span>-<span id=timer>0</span></h2>
+	<table>
+		<tr id="board">
+		</tr>
+	</table>
+</body>
+<script>
+	let model1 = ["pic00.png","pic00.png",
+				 "pic01.png","pic01.png",
+				 "pic02.png","pic02.png",
+				 "pic03.png","pic03.png"
+	];
+	
+	let model2 = ["pic00.png","pic00.png",
+				 "pic01.png","pic01.png",
+				 "pic02.png","pic02.png",
+				 "pic03.png","pic03.png",
+				 "pic04.png","pic04.png",
+				 "pic05.png","pic05.png"
+	];
+	
+	let model3 = ["pic00.png","pic00.png",
+				 "pic01.png","pic01.png",
+				 "pic02.png","pic02.png",
+				 "pic03.png","pic03.png",
+				 "pic04.png","pic04.png",
+				 "pic05.png","pic05.png",
+				 "pic06.png","pic06.png",
+				 "pic07.png","pic07.png"
+	];
+	$(document).ready(function(){
+		let loginState = "guest";
+		$("#loginState").text(loginState);
+		
+		let timerNum = 0;
+		timer = setInterval(function(){
+			timerNum++;
+			$("#timer").text(timerNum);
+		}, 1000);
+		let total = 0; // 전체 몇번째 클릭인지..
+		
+		let stage = 1;
+		
+// ----------------------------------------------------------------------------------------------------->		
+		// stage1 이면 모델1, stage2 이면 모델2, 
+		model = model1;
+		console.log(model.lenght);
+		// 모델 셔플
+		for(let i=0; i<100000; i++) {
+			let ran = Math.floor(Math.random()*model.length);
+			let tmp = model[0];
+			model[0] = model[ran];
+			model[ran] = tmp
+ 		}
+		// 모델 출력
+		$("#board").empty();
+		$(model).each(function(index, item){
+			// 우클릭 방지: oncontextmenu='return false' 
+			// 드래그 방지: ondragstart='return false'
+			$("#board").append("<td oncontextmenu='return false' ondragstart='return false'><input class='pic' type='image' src='/jquery-ex/images/"+item+"'></td>");
+		});
+		$(".pic").each(function(){
+			$(this).animate({opacity:0.1}, 3000); // 이슈 : 드래그 버그 -> 우클릭 방지로 방지
+		});
+		// 게임 변수 설정
+		let state = 0; // 0 or 1 or 2
+		let success = 0; // 몇개의 그림을 맞추었는지... 
+		let onePic = null;
+		let twoPic = null;
+// --------------------------------------------------------------------------------------------------------------		
+		
+		
+		
+		$(".pic").click(function(){
+			total++;
+			state++;
+			$(this).attr("disabled",true); // 더블클릭 방지를 위해
+			if(1 == state) {
+				console.log("state 1");
+				$(this).animate({opacity:1},1);
+				onePic = $(this);
+			} else if(2 == state) {
+				console.log("state 2");
+				$(this).animate({opacity:1},1);
+				twoPic = $(this);
+				if($(onePic).attr("src") == $(twoPic).attr("src")) {
+					success++;
+					console.log("success: ", success);
+					if(success == model.length/2) {
+						clearInterval(timer);
+						console.log("게임종료 시간("+timerNum+"), 횟수("+total+")" );
+						// 게임 종료
+						stage += 1;
+						
+						if(stage < 4) {
+							// stage1 이면 모델1, stage2 이면 모델2, 
+							if(stage == 2) {
+								model = model2;	
+							} else if(stage == 3) {
+								model = medel3;
+							}
+							
+							console.log(model.lenght);
+							// 모델 셔플
+							for(let i=0; i<100000; i++) {
+								let ran = Math.floor(Math.random()*model.length);
+								let tmp = model[0];
+								model[0] = model[ran];
+								model[ran] = tmp
+					 		}
+							// 모델 출력
+							$("#board").empty();
+							$(model).each(function(index, item){
+								// 우클릭 방지: oncontextmenu='return false' 
+								// 드래그 방지: ondragstart='return false'
+								$("#board").append("<td oncontextmenu='return false' ondragstart='return false'><input class='pic' type='image' src='/jquery-ex/images/"+item+"'></td>");
+							});
+							$(".pic").each(function(){
+								$(this).animate({opacity:0.01}, 3000); // 이슈 : 드래그 버그 -> 우클릭 방지로 방지
+							});
+							// 게임 변수 설정
+							let state = 0; // 0 or 1 or 2
+							let success = 0; // 몇개의 그림을 맞추었는지... 
+							let onePic = null;
+							let twoPic = null;	
+						} else {
+							return;
+						}
+					}
+				} else {
+					$(onePic).animate({"opacity":0.01}, 500);
+					$(twoPic).animate({"opacity":0.01}, 500);
+					$(onePic).attr("disabled",false);
+					$(twoPic).attr("disabled",false);
+				}
+				state = 0;
+			}
+		});
+	});
+</script>
+</html>

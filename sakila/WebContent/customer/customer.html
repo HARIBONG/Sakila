@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        position: relative;
+        overflow-y: auto;
+    }
+    
+    #aside {
+        width: 200px;
+        height: 3000px;
+        position: fixed;
+        background: orange;
+        overflow: hidden;
+        float: left;
+    }
+    
+    #section {
+        margin-left: 300px;
+        margin-right: 500px;
+        margin-bottom: 100px;
+        background: white;
+    }
+    table,td{
+     	border : 1px solid #000000;
+    }
+</style>
+</head>
+<body>
+	<div id="aside"></div>
+	<div id="section">
+		<h2>CUSTOMER</h2>
+		<div>
+			<table>
+				<tr>
+					<td>
+						<!-- 							countrylist -->
+						<div>
+							<select size="10" id="countryList"></select>
+						</div>
+					</td>
+
+					<td>
+						<div>
+							<select size="10" id="cityList"></select>
+						</div> <!-- 							city list  -->
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div>
+			<!--  고객의 정보가 입력 -->
+			<h3>고객 정보 입력</h3>
+				<form>
+					<fieldset>
+						<legend>주소입력</legend>
+						<div>cityId : <input type="text" id="cityId" readonly="readonly"></div>
+						<div>address : <input type="text"></div>
+						<div>cityId2 : <input type="text"></div>
+						<div>district : <input type="text"></div>
+						<div>postalCode : <input type="text"></div>
+						<div>phone : <input type="text"></div>
+					</fieldset>
+					<fieldset>
+						<legend>고객정보</legend>
+						<div>storeId :
+							<select id="storeId">
+								
+							</select>
+						</div>
+						<div>firstName : <input type="text"></div>
+						<div>lastName : <input type="text"></div>
+						<div>email : <input type="text"></div>
+					</fieldset>
+					<button type="button" id="addCustomer">고객입력</button>
+				</form>
+		</div>
+		<h2>customer list</h2>
+		<!-- 고객 정보(일부) 리스트 : (클릭하면) 상세정보로 링크 -->
+		<form>
+			<fieldset>
+				<legend>고객 정보</legend>
+				<table border = "1">
+					<thead>
+					<tr>
+						<th>customerId <a href=""></a></th>
+						<th>storeId</th>
+						<th>firstName</th>
+						<th>lastName</th>
+						<th>email</th>
+						<th>addressId</th>
+						<th>active</th>
+						<th>create_date</th>
+						<th>last_update</th>
+					</tr>
+					</thead>
+					<tbody id = "customerId">
+					
+					</tbody>
+				</table>
+			</fieldset>
+		</form>
+		
+	</div>
+</body>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+	$("#aside").load("/sakila/aside.html");
+	$.ajax({
+		url : "/sakila/address/SelectCountryAll",
+		method : "POST",
+		success : function(json) {
+			$(json).each(function(index, item) { // json값의 크기만큼 반복된다. (each==반복문)
+				temp = "<option value='";
+				temp += item.countryId;
+				temp += "'>";
+				temp += item.country;
+				temp += "</option>";
+				$("#countryList").append(temp);
+			});
+		}
+	});
+
+	$("#countryList").change(function() {
+		$.ajax({
+			url:"/sakila/address/SelectCityListByCountry",
+			method:"POST",
+			data:{"countryId" : $("#countryList").val()},
+			success:function(json){
+				console.log(json);
+				$("#cityList").empty();
+				$(json).each(function(index,item){
+					temp = "<option value = " + item.cityId+">"+item.city+"</option>";
+					$("#cityList").append(temp);
+				});
+			}
+		});
+	});
+	
+	$.ajax({
+		url:"/sakila/SelectCustomerList",
+		method:"POST",
+		success:function(json){
+			console.log(json);
+			$("#customerList").empty();
+			$(json).each(function(index, item){
+				temp = "<tr><td>";
+				temp += item.customerId;
+				temp += "</td><td>";
+				temp += item.storeId;
+				temp += "</td><td>";
+				temp += item.firstName;
+				temp += "</td><td>";
+				temp += item.lastName;
+				temp += "</td><td>";
+				temp += item.email;
+				temp += "</td><td>";
+				temp += item.addressId;
+				temp += "</td><td>";
+				temp += item.active;
+				temp += "</td><td>";
+				temp += item.createDate;
+				temp += "</td><td>";
+				temp += item.lastUpdate;
+				temp += "</td></tr>";
+				$("#customerId").append(temp);
+			});
+		}
+	});
+</script>
+</html>

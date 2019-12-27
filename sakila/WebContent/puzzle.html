@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style type="text/css">
+table, td {
+	border: 1 solid gray;
+}
+
+table {
+	border-collapse: collapse;
+}
+</style>
+<script src="/jquery-ex/scripts/jquery-3.4.1.min.js"></script>
+
+</head>
+<body oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
+	<h1>PUZZZLE - <span id="loginState"></span>[TIME : <span id="timer">0</span>]</h1>
+	
+	<table id="board" border="1">
+	
+	</table>
+	
+	<img id="img" src = "/jquery-ex/images/업계포상2.jpg">
+</body>
+<script>
+	let model1 = ["1.jpg",  "1.jpg", 
+			 "2.jpg",  "2.jpg", 
+			 "3.jpg",  "3.jpg", 
+			 "4.jpg",  "4.jpg",
+			 "5.jpg",  "5.jpg",
+			 "6.jpg",  "6.jpg"];
+
+	let model2 = ["1.jpg",  "1.jpg", 
+				 "2.jpg",  "2.jpg", 
+				 "3.jpg",  "3.jpg", 
+				 "4.jpg",  "4.jpg",
+				 "5.jpg",  "5.jpg",
+				 "6.jpg",  "6.jpg",
+				 "7.jpg",  "7.jpg",
+				 "8.jpg",  "8.jpg",
+				 "9.jpg",  "9.jpg",
+				"10.jpg", "10.jpg",
+				"11.jpg", "11.jpg",
+				"12.jpg", "12.jpg",
+				"13.jpg", "13.jpg",
+				"14.jpg", "14.jpg",
+				"15.jpg", "15.jpg",
+				"16.jpg", "16.jpg",
+				"17.jpg", "17.jpg",
+				"18.jpg", "18.jpg"
+				];
+	$(document).ready(function(){
+		
+		model=model1
+		
+		$("img").hide();
+		//session 값을 동기형으로 요청 
+		let loginState = null;
+		$.ajax({
+			url:"/jquery-ex/GetSessionInfo",
+			method: "POST",
+			async: false,//동기요청
+			success: function(json){
+				loginState = json;
+				console.log("login : " +loginState);
+			}
+			});
+		if(loginState == null){
+			location.href = "/jquery-ex/login.html";
+			return false;//뒤에 뭔가 더 할 일이 있어도 종료시킨다.
+		}
+	
+		//상단에 로그인 id 표시-------------------------------------------------------
+		$("#loginState").text(loginState);
+		let timerNum = 0;		
+		timer = setInterval(function(){
+			timerNum++;
+			$("#timer").text(timerNum);
+		}, 1000);
+		
+		//stage--------------------------------------------------------------
+		
+		
+		//모델 셔플-------------------------------------------------------
+		for(let i=0; i<1000000; i++){
+			let ran = Math.floor(Math.random()*model.length);
+			let tmp = model[0];
+			model[0] = model[ran];
+			model[ran] = tmp;
+		}
+		
+		//모델 출력-------------------------------------------------------
+		$("#board").empty();
+		$(model).each(function(index, item){
+			$("#board").append("<td><input class = 'pic' type='image' src='/jquery-ex/images/"+item+"'></td>");
+			if((index+1) % 6==0 && index > 0){
+				$("#board").append("</tr><tr>");
+			}
+		});
+		//카드의 투명도와 사라지는데 걸리는 시간----------------------------------------
+		$(".pic").each(function(){
+			$(this).animate({opacity:1}, 3000);
+		});
+		
+		//게임 변수 설정-------------------------------------------------------
+		let total = 0; //전체 몇번 클릭했는지
+		let state = 0; //0 or 1 or 2 의 의미를 갖는다
+		let success = 0; //몇번성공했는지
+		let onePic = null;//그림의 이름이 들어옴
+		let twoPic = null;
+		
+		$(".pic").click(function(){
+			console.log($(this).attr("src"));
+			total++;//클릭하면 무조건 토탈 1+
+			state++;
+			$(this).attr("disabled", true);// 더블클릭 방지
+			
+			if(1 == state){
+				console.log("state:1");
+				$(this).animate({opacity:0.3},1)	
+				onePic = $(this);
+			} else if(2 == state){
+				console.log("state:2");
+				$(this).animate({opacity:0.3},1)
+				twoPic = $(this);
+				
+				if($(onePic).attr("src") == $(twoPic).attr("src")){
+					success++;
+					if(success == model.length/2){
+						alert("[Game Over!] "+ "TOTAL CLICK : "+total + " CLEAR TIME : "+timerNum);
+						$("img").fadeIn(3000);//이미지출력 
+						$.ajax({
+							url: "/jquery-ex/GetAddReport",
+							method : "POST",
+							data : {"memberId": loginState, "timer":timerNum, "count":total},
+							success:function(data){
+									
+							}
+						})
+						return;
+					} 
+					}else{
+						$(onePic).animate({"opacity":0.01},1);
+						$(twoPic).animate({"opacity":0.01},1);
+						$(onePic).attr("disabled", false);
+						$(twoPic).attr("disabled", false);
+					}
+					state = 0;
+			}
+			 
+		});
+		//클리어시 데이터가 저장될수 있게함--------------------------------------------------------
+		$()
+	});
+</script>
+</html>
